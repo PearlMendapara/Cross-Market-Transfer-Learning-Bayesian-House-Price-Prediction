@@ -6,3 +6,9 @@ venv/
 .DS_Store
 # dataset is downloaded from Kaggle, not committed
 *.csv
+
+# editor / OS files
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

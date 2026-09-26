@@ -121,7 +121,9 @@ The Phase 3 script's docstring documents each fix. In short:
 | PCA via SVD | Ch. 10 |
 | Regularisation paths, convex optimisation | Ch. 7 |
 
-## Author
+## Authors
 
 **Pearl Mendapara** — B.Tech Computing & Mathematics, Mahindra University ·
 B.Sc. Data Science, IIT Madras
+
+**Harshil Pansala** ([@Harshil1-0](https://github.com/Harshil1-0)) — collaborator

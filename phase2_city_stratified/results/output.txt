@@ -1,0 +1,74 @@
+=================================================================
+PHASE 2 — CITY-STRATIFIED REGRESSION GENERALISATION STUDY
+=================================================================
+
+[Data] Generating synthetic 7-city dataset …
+  4,650 rows across 7 cities  |  16 features
+  Cities: Boston, Chicago, Denver, Los Angeles, Miami, New York, Seattle
+
+[Preprocessing]
+  X shape: (4650, 16)  |  unique cities: 7
+
+[λ search — this may take a moment…]
+  Best λ_ridge (LOCO): 1000.000
+  Best λ_lasso (LOCO): 681.292
+
+=================================================================
+SECTION 4 — LEAVE-ONE-CITY-OUT CROSS-VALIDATION
+=================================================================
+  Held-out: Boston       | OLS=0.3716  Ridge=0.3721  Lasso=0.3804  → Best: OLS
+  Held-out: Chicago      | OLS=0.6563  Ridge=0.6569  Lasso=0.6611  → Best: OLS
+  Held-out: Denver       | OLS=0.3013  Ridge=0.2995  Lasso=0.3014  → Best: Ridge
+  Held-out: Los Angeles  | OLS=0.4286  Ridge=0.4304  Lasso=0.4433  → Best: OLS
+  Held-out: Miami        | OLS=0.3236  Ridge=0.3236  Lasso=0.3319  → Best: OLS
+  Held-out: New York     | OLS=0.7097  Ridge=0.6869  Lasso=0.5974  → Best: Lasso
+  Held-out: Seattle      | OLS=0.3080  Ridge=0.3095  Lasso=0.3255  → Best: OLS
+
+Held-out City    |   OLS RMSE |  Ridge RMSE |  Lasso RMSE |   Best
+-----------------------------------------------------------------
+Boston           |     0.3716 |      0.3721 |      0.3804 |    OLS
+Chicago          |     0.6563 |      0.6569 |      0.6611 |    OLS
+Denver           |     0.3013 |      0.2995 |      0.3014 |  Ridge
+Los Angeles      |     0.4286 |      0.4304 |      0.4433 |    OLS
+Miami            |     0.3236 |      0.3236 |      0.3319 |    OLS
+New York         |     0.7097 |      0.6869 |      0.5974 |  Lasso
+Seattle          |     0.3080 |      0.3095 |      0.3255 |    OLS
+-----------------------------------------------------------------
+Average          |     0.4427 |      0.4398 |      0.4344
+
+=================================================================
+SUMMARY STATISTICS
+=================================================================
+  OLS    | Mean RMSE: 0.4427 | Std: 0.1705 | Max: 0.7097
+  Ridge  | Mean RMSE: 0.4398 | Std: 0.1648 | Max: 0.6869
+  Lasso  | Mean RMSE: 0.4344 | Std: 0.1420 | Max: 0.6611
+
+  Overall best model (majority vote): OLS
+  Mean held-out RMSE reduction, best regularised model vs OLS: 0.0083
+
+[Plot 1 saved] figures/plot_rmse_by_city.png
+[Plot 2 saved] figures/plot_pca_cities.png
+[Plot 3 saved] figures/plot_avg_price_by_city.png
+
+[Best model across cities: OLS (wins in 5/7 cities)]
+[Plot 4 saved] figures/plot_pred_vs_actual.png
+
+=================================================================
+FINAL REPORT
+=================================================================
+  Dataset          : 7-city synthetic (Metro Combined structure)
+  Total samples    : 4,650
+  Features used    : 16
+  CV strategy      : Leave-One-City-Out (LOCO)
+  Best λ (Ridge)   : 1000.000
+  Best λ (Lasso)   : 681.292
+  Mean RMSE — OLS  : 0.4427
+  Mean RMSE — Ridge: 0.4398
+  Mean RMSE — Lasso: 0.4344
+  Overall winner   : OLS  (RMSE=0.4828 out-of-sample)
+
+  Key insight: OLS wins most held-out cities, but Lasso has the lowest
+  mean RMSE because it sharply cuts error on New York, the most extreme
+  market. Regularisation pays off where the unseen city is furthest
+  from the training distribution.
+=================================================================

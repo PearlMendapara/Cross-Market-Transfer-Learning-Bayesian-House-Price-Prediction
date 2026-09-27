@@ -1,0 +1,135 @@
+============================================================
+SECTION 1 — RAW DATA OVERVIEW
+============================================================
+Shape                 : (500, 12)           (500 rows, 12 columns)
+
+Column names          : ['Area', 'BHK', 'Bathroom', 'Parking', 'Floor', 'TotalFloor',
+'Age', 'City', 'Location', 'Furnishing', 'Status', 'Price']
+
+Data types:
+    Area                int64
+BHK                    int64
+Bathroom             float64
+Parking              float64
+Floor                  int64
+TotalFloor             int64
+Age                  float64
+City                     str
+Location                 str
+Furnishing               str
+Status                   str
+Price                  int64
+dtype: object
+
+First 5 rows:
+       Area   BHK     Bathroom        ...      Furnishing                Status       Price
+0     1360     3          NaN     ...        Unfurnished    Under Construction    13783423
+1     4272     3          2.0     ...          Furnished    Under Construction    41311320
+2     3592     3          2.0     ...        Unfurnished         Ready to Move    40555141
+3      966     5          2.0     ...        Unfurnished    Under Construction    27184257
+4     4926     2          2.0     ...          Furnished         Ready to Move    40304890
+
+[5 rows x 12 columns]
+
+============================================================
+SECTION 2 — EDA
+============================================================
+
+--- Missing Values ---
+                   Missing Count        % Missing
+Bathroom                         10              2.0
+Parking                          10              2.0
+Age                              10              2.0
+Furnishing                       10              2.0
+[Plot saved] plot1_price_distribution.png
+[Plot saved] plot2_correlation_heatmap.png
+[Plot saved] plot3_outliers.png
+[Plot saved] plot4_price_by_city.png
+
+============================================================
+SECTION 3 — FEATURE ENGINEERING
+============================================================
+  Filled NaN in 'Bathroom' with median = 2.0
+  Filled NaN in 'Parking' with median = 1.0
+  Filled NaN in 'Age' with median = 14.0
+  Filled NaN in 'Furnishing' with mode             = Unfurnished
+
+  Target skewness (raw)        : 0.94
+  Target skewness (log)        : -0.34
+  → Log transform applied to reduce right-skew.
+
+  Shape after one-hot encoding: (500, 21)
+  Features standardised        : mean≈0, std≈1
+  Final feature matrix X : (500, 21)
+
+============================================================
+SECTION 4 — MODEL IMPLEMENTATIONS
+============================================================
+
+============================================================
+SECTION 5 — 5-FOLD CROSS-VALIDATION (RMSE on log-price)
+============================================================
+
+  OLS     RMSE (5-fold)   : 0.1229
+  Ridge RMSE (best)       : 0.1229       (λ = 0.5569)
+  Lasso RMSE (best)       : 0.1226       (α = 0.0010)
+
+  ┌────────────────────┬──────────────┬────────────────┐
+  │ Model                  │ Best λ / α        │    5-fold RMSE        │
+  ├────────────────────┼──────────────┼────────────────┤
+  │ OLS                    │         —         │    0.1229         │
+  │ Ridge                  │       0.5569      │    0.1229         │
+  │ Lasso                  │       0.0010      │    0.1226         │
+  └────────────────────┴──────────────┴────────────────┘
+
+============================================================
+SECTION 6 — GENERATING REQUIRED PLOTS
+============================================================
+[Plot saved] plot5_rmse_vs_lambda.png
+[Plot saved] plot6_regularisation_path.png
+[Plot saved] plot7_predicted_vs_actual.png
+[Plot saved] plot8_lasso_feature_importance.png
+
+============================================================
+SECTION 7 — INTERPRETATION SUMMARY
+============================================================
+
+  Best performing model        : Lasso     (RMSE = 0.1226)
+
+  OLS     RMSE   : 0.1229
+  Ridge RMSE : 0.1229       (λ = 0.5569)
+  Lasso RMSE : 0.1226       (α = 0.0010)
+
+  MML Theory connection:
+  • Ridge = MAP estimation with Gaussian prior on weights (Ch. 9)
+    Adding λ||w||² penalises large weights, equivalent to assuming
+    weights follow N(0, σ²/λ). Shrinks all weights toward zero.
+
+  • Lasso = MAP estimation with Laplace prior on weights (Ch. 9)
+    Adding λ||w||_1 produces sparse solutions: many weights become
+    exactly zero, giving automatic feature selection.
+
+  • OLS = Maximum Likelihood Estimation (MLE) with no prior.
+    Finds the unique minimum of ||y - Xw||², but can overfit
+    on high-dimensional data.
+
+  Top features by Lasso (non-zero coefficients):
+
+    Area                                         coef = +0.4864   (↑ price)
+    City_Mumbai                                  coef = +0.2649   (↑ price)
+    City_Delhi                                   coef = +0.1738   (↑ price)
+    City_Bangalore                               coef = +0.1618   (↑ price)
+    City_Hyderabad                               coef = +0.0810   (↑ price)
+    City_Chennai                                 coef = +0.0414   (↑ price)
+    City_Kolkata                                 coef = -0.0392   (↓ price)
+    Age                                          coef = -0.0358   (↓ price)
+    BHK                                          coef = +0.0249   (↑ price)
+    City_Pune                                    coef = +0.0237   (↑ price)
+
+  Conclusion:
+  Regularised models (Ridge, Lasso) outperform OLS when the
+  number of features is large relative to samples. Lasso also
+  provides built-in feature selection by zeroing irrelevant weights.
+
+[All done!] 8 plots saved. See plot1_*.png through plot8_*.png
+

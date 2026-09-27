@@ -1,0 +1,143 @@
+======================================================================
+PHASE 3 — CROSS-MARKET TRANSFER & BAYESIAN UNCERTAINTY
+======================================================================
+
+======================================================================
+SECTION 1 — INDIA DATASET  (ankushpanday1 structure, n=500)
+======================================================================
+  India dataset   : 500 rows × 26 features
+  Target (log₁ₚ)  : mean=18.795  std=0.427
+  Cities          : 8
+
+======================================================================
+SECTION 2 — AMES-PROXY DATASET  (Iowa, USA, n=1,460 equivalent)
+======================================================================
+  Ames proxy      : 1460 rows × 12 features
+  Target (log₁ₚ)  : mean=12.480  std=0.226
+  Price range     : $103,742 – $460,522
+
+======================================================================
+SECTION 3 — FEATURE ALIGNMENT (Universal vs Market-Specific)
+======================================================================
+  Universal features   (4) : ['Area', 'BHK', 'Bathroom', 'Age']
+  India-specific      (7) : ['City', 'Location', 'Furnishing', 'Status', 'Parking', 'Floor', 'TotalFloor']
+  Ames-specific       (7) : ['OverallQual', 'GarageArea', 'LotArea', 'TotalBsmtSF', 'Fireplaces', 'OverallCond', 'TotRmsAbvGrd']
+
+  Aligned India (universal) : (500, 4)
+  Aligned Ames  (universal) : (1460, 4)
+  Shared feature names      : ['Area', 'BHK', 'Bathroom', 'Age']
+
+======================================================================
+SECTION 4 — CROSS-MARKET TRANSFER EXPERIMENT
+======================================================================
+
+  Best Ridge λ (India 5-fold CV) : 0.4292
+
+  ┌──────────────────────────────────────┬────────────┬────────────┐
+  │ Experiment                           │  OLS RMSE  │ Ridge RMSE │
+  ├──────────────────────────────────────┼────────────┼────────────┤
+  │ IN-MARKET  India → India (5-fold CV) │  0.2555    │  0.2555    │
+  │ IN-MARKET  Ames  → Ames  (5-fold CV) │  0.1502    │  0.1502    │
+  │ TRANSFER   India → Ames              │  6.3192    │  6.3192    │
+  │ TRANSFER   Ames  → India             │  6.3224    │  6.3224    │
+  └──────────────────────────────────────┴────────────┴────────────┘
+
+  Transfer degradation (India → Ames, Ridge):
+    RMSE increase = 6.1690
+    (4107.4% worse than in-market Ames baseline)
+
+  Transfer degradation (Ames → India, Ridge):
+    RMSE increase = 6.0669
+    (2374.1% worse than in-market India baseline)
+
+======================================================================
+SECTION 5 — FEATURE UNIVERSALITY ANALYSIS
+======================================================================
+
+  Cosine similarity of weight vectors (India vs Ames): 0.9292
+  (1.0 = identical pricing logic, 0.0 = orthogonal / market-specific)
+
+  Per-feature universality table:
+ Feature  India_coef  Ames_coef  Sign_match  Abs_diff  Universal
+    Area    0.339823   0.156699        True  0.183125       True
+     BHK    0.022057   0.024037        True  0.001980       True
+Bathroom    0.021882   0.044987        True  0.023105       True
+     Age    0.028879  -0.036529       False  0.065408      False
+
+======================================================================
+SECTION 6 — BAYESIAN LINEAR REGRESSION (Posterior Predictive Intervals)
+======================================================================
+  Bayesian LR in-market RMSE (India) : 0.2543
+  Bayesian LR transfer RMSE (→ Ames) : 6.3177
+  Mean predictive std (in-market)    : 0.2010
+  Mean predictive std (transfer)     : 0.2010
+  Transfer error / predictive std    : 31.43x
+  → Ratio >> 1: model is miscalibrated on transfer data.
+  → σ is stable across markets; RMSE explodes due to price-scale mismatch.
+  → A market-specific scale prior (Ch. 9.4) is needed to widen intervals.
+  Bayesian LR transfer RMSE (→ India): 6.3227
+
+======================================================================
+SECTION 7 — GENERATING PLOTS
+======================================================================
+[Plot 1 saved] p3_plot1_transfer_rmse.png
+[Plot 2 saved] p3_plot2_weight_comparison.png
+[Plot 3 saved] p3_plot3_bayesian_intervals.png
+[Plot 4 saved] p3_plot4_pred_actual_grid.png
+[Plot 5 saved] p3_plot5_universality_heatmap.png
+[Plot 6 saved] p3_plot6_reg_paths.png
+[Plot 7 saved] p3_plot7_uncertainty_vs_error.png
+[Plot 8 saved] p3_plot8_summary.png
+
+======================================================================
+SECTION 8 — FINAL SUMMARY
+======================================================================
+
+  PHASE 3 RESULTS SUMMARY
+  ═══════════════════════════════════════════════════════════════════
+
+  1. CROSS-MARKET TRANSFER
+     India in-market (Ridge, 5-fold CV)       RMSE = 0.2555
+     Ames  in-market (Ridge, 5-fold CV)       RMSE = 0.1502
+     India → Ames transfer (Ridge)            RMSE = 6.3192
+     Ames  → India transfer (Ridge)           RMSE = 6.3224
+
+     Transfer adds 4107.4% error vs Ames in-market.
+     Some pricing signal IS universal; domain shift explains the gap.
+
+  2. FEATURE UNIVERSALITY
+     Cosine similarity (India vs Ames weights): 0.9292
+     Universal features (same sign, |Δ|<0.3):
+       • Area  ✓ Universal
+       • BHK  ✓ Universal
+       • Bathroom  ✓ Universal
+       • Age  ✗ Market-specific
+
+  3. BAYESIAN UNCERTAINTY
+     Bayesian LR in-market RMSE  (India) : 0.2543
+     Bayesian LR transfer RMSE (→ Ames)  : 6.3177
+     Bayesian LR transfer RMSE (→ India) : 6.3227
+     Mean σ in-market (India)            : 0.2010
+     Mean σ on transfer set (→ Ames)     : 0.2010
+     → Posterior predictive σ is similar across markets because
+       both feature matrices share 4 standardised dimensions.
+       The model's RMSE explodes on transfer while σ stays flat —
+       showing the conjugate-Gaussian posterior is miscalibrated for
+       cross-market use.  A market-specific scale prior (Ch. 9.4)
+       would be required to widen credible intervals appropriately.
+
+  MML THEORY LINKS
+  ─────────────────
+  • OLS / Ridge: Ch. 9 — MAP estimation, Normal Equation
+  • Bayesian LR: Ch. 9.3-9.4 — Conjugate prior, Posterior Predictive
+  • PCA alignment: Ch. 10 — SVD, explained variance
+  • Regularisation paths: Ch. 7 — Convex optimisation, shrinkage
+
+  8 plots saved:
+  p3_plot1_transfer_rmse.png         p3_plot2_weight_comparison.png
+  p3_plot3_bayesian_intervals.png    p3_plot4_pred_actual_grid.png
+  p3_plot5_universality_heatmap.png  p3_plot6_reg_paths.png
+  p3_plot7_uncertainty_vs_error.png  p3_plot8_summary.png
+  ═══════════════════════════════════════════════════════════════════
+
+
